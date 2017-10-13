@@ -160,71 +160,6 @@
     }
 }
 
-@mixin component($conf: (), $self:false) {
-    // Extending the default arguments with the given object
-    $conf: extend((
-            width: 100%,
-            height: auto,
-            color: #474747,
-            background: #EEEBE9,
-            duration: 250ms,
-            name: '.component',
-            border: true,
-            padding:20px,
-            border-color: #979797
-    ), $conf);
-    @if $self == true {
-        //dump css without a selector
-        width: map-get($conf, width);
-        height: map-get($conf, height);
-        animation: fade map-get($conf, duration);
-        padding: map-get($conf, padding);
-        background: map-get($conf, background);
-        color: map-get($conf, color);
-
-        @if map-get($conf, border) == true {
-            border: 1px solid map-get($conf, border-color);
-        }
-        @if map-has-key($conf, col-sm) {
-            @include breakpoint(sm) {
-                display: block;
-                width: 100% / map-get($conf, col-sm);
-            }
-        }
-        @if map-has-key($conf, col-xs) {
-            @include breakpoint(xs) {
-                display: block;
-                width: 100% / map-get($conf, col-xs);
-            }
-        }
-    } @else {
-        // Dumping CSS
-        #{map-get($conf, name)} {
-            width: map-get($conf, width);
-            height: map-get($conf, height);
-            animation: fade map-get($conf, duration);
-            padding: map-get($conf, padding);
-            background: map-get($conf, background);
-            color: map-get($conf, color);
-
-            @if map-get($conf, border) == true {
-                border: 1px solid map-get($conf, border-color);
-            }
-            @if map-has-key($conf, col-sm) {
-                @include breakpoint(sm) {
-                    display: block;
-                    width: 100% / map-get($conf, col-sm);
-                }
-            }
-            @if map-has-key($conf, col-xs) {
-                @include breakpoint(xs) {
-                    display: block;
-                    width: 100% / map-get($conf, col-xs);
-                }
-            }
-        }
-    }
-}
 @function map-deep-get($map, $keys...) {
     $value: $map;
     @each $key in $keys {
@@ -247,11 +182,29 @@ $result: map-merge(nth($map-list, $i), (nth($keys, $i): if($i == length($map-lis
 @return $result;
 }
 
+// a map-set function (not included with Sass)
+@function map-set($map, $key, $value) {
+    $new: ($key: $value);
+    @return map-merge($map, $new);
+}
+
+@function map-swap-key($map, $key, $keyInv) {
+
+    $map1 : map_get($map,$key);
+    $mapswap : map_get($map,$keyInv);
+
+    $new: (
+            $key: $mapswap,
+            $keyInv: $map1,
+    );
+    @return map-merge($map, $new);
+}
+
 @mixin doTypeset($conf: (),$self:false) {
     // Extending the default arguments with the given object
-    $conf: extend(map_get( $type-style, 'default'), $conf);
+    $conf: extend(map_get($type-style, 'default'), $conf);
 
-   $modularscale: map-get($conf, modularscale);
+    $modularscale: map-get($conf, modularscale);
     @include ms-respond(font-size, 0);
 
     font-family: map-get($conf, font-family);
@@ -259,53 +212,53 @@ $result: map-merge(nth($map-list, $i), (nth($keys, $i): if($i == length($map-lis
     text-decoration: map-get($conf, text-decoration);
     font-weight: map-get($conf, font-weight);
     letter-spacing: map-get($conf, letter-spacing )*$type-scale;
-$children: map-get($conf, children);
+    $children: map-get($conf, children);
     @each $selector, $sizeval in $children {
         @debug $sizeval;
-               #{$selector} {
-                   @include ms-respond(font-size, $sizeval);
-               }
+        #{$selector} {
+            @include ms-respond(font-size, $sizeval);
+        }
+    }
+}
+@mixin component($selector: 'generic-component',$confContainer: get-default($containerset), $confTheme: get-default($themeset),$confType : get-default($type-style)) {
+ #{$selector} {
+   @include container($confContainer, $confTheme);
+        @include doTypeset($confType);
+        @content;
+    }
+}
+@mixin container($confContainer: get-default($containerset), $confTheme: get-default($themeset)) {
+    // Extending the default arguments with the given object
+    $conf: $confContainer;
 
-       // @debug $value;
+    $confTheme: extend(get-default($themeset), $confTheme);
 
-              //  }
+    //from default container
+    //dump css without a selector
+    width: map-get($conf, width);
+    height: map-get($conf, height);
+    animation: fade map-get($conf, duration);
+    padding: map-get($conf, padding);
+    border-width: map-get($conf, border-width);
+    border-style: map-get($conf, border-style);
+    text-align: map_get($conf, text-align);
+    overflow: map_get($conf, overflow);
+    //from themeset
+    background: map_get($confTheme, background);
+    color: map_get($confTheme, foreground);
+    border-color: map_get($confTheme, border);
 
+    //content add ons.
+    $accented: map-get($conf, accentSelector);
+    #{$accented} {
+        color: map_get($confTheme, border);
     }
 
-
-h1{
-
-    @include ms-respond(font-size, 4);
+    $children-content: map-get($conf, child-content);
+    @each $selector, $placeholder in $children-content {
+        #{$selector} {
+            @extend %#{$placeholder} !optional;
+        }
+    }
+    @content;
 }
-
-/*
-    #{map-get($conf, name)} {
-
-    }*/
-}
-/*
-font-family: Arial,
-text-transform: none
-text-decoration:none,
-font-weight: normal,
-letter-spacing: 0px,
-                 line-height: 1.5,
-leading: 1.5,
-font-size: 0,
-children: (
-p : 0,
-h1:6,
-h2:5,
-),
-'modularscale': (
-base: 1em,
-       ratio: 1.5,
-400px: (
-base:2.2em,
-),
-900px: (
-base: .875em,
-),
-),
-'scale' : false,
-*/

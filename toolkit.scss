@@ -34,7 +34,52 @@ $mymap:map_get($type-style, 'default' );
 
 //$mymap:map_get($type-style, 'default' );
 @debug $mymap;
+
+
+@function get-default($conf: (),$key:default) {
+        @return  map-get($conf, $key);
+
+}
+/*$container-default: (
+        width: 100%,
+        height: auto,
+        color: white,
+        background: black,
+        duration: 250ms,
+        name: '.component',
+        padding:20px,
+        border-width: 1px 2em 0 4rem,
+        border: solid #ff0000,
+);*/
+
+%specialchildprops {
+        display: block;
+        background: blue;
+
+}
+%specialchildprops2 {
+        display: block;
+        background: chartreuse;
+
+}
+
+@mixin generateButtons($key : map_get($component-key-set,default), prefix:'' ){
+
+    $themeset-inverted: map-swap-key(map_get($themeset,secondary), foreground, background);
+        $themeset-accent:map-swap-key(map_get($themeset,secondary), accent, background);
+
+        @include component('.btn-secondary' + 'testing',get-default($containerset),map_get($themeset,secondary));
+        @include component('.btn-secondary-inverted',get-default($containerset),$themeset-inverted);
+        @include component('.btn-secondary-accent',get-default($containerset),$themeset-accent);
+
+}
+//@debug
+
+
 html {
-      //  @include ms-respond(font-size, 0);
-        @include doTypeset($mymap);
+@include generateButtons();
+}
+
+.sixteen-nine{
+        display: block;
 }
