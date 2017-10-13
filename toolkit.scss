@@ -1,0 +1,40 @@
+@import 'node_modules/modularscale-sass/stylesheets/modularscale';
+@import 'node_modules/normalize.css/normalize.css';
+@import 'helpers/helpers';
+
+
+//$modularscale:();
+
+$palette: (
+        colors: (
+                'jungle': $madras,
+                'olive': $khaki,
+                'sunset': $onion
+        ),
+        tones: (
+                ‘dark’: 10,
+                ‘normal’ : 0,
+                ‘light’ : -10
+        ),
+        alpha: (
+                ‘low’: 0.40,
+                ‘medium’: 0.60,
+                ‘high’: 0.80
+        ),
+        mix: (
+                ‘color’: #ff0000,
+                ‘keep’: 100%
+        )
+);
+
+
+@debug ms(0);
+$mymap:map_get($type-style, 'default' );
+@debug (map-deep-get($mymap, 'children', h1));
+
+//$mymap:map_get($type-style, 'default' );
+@debug $mymap;
+html {
+      //  @include ms-respond(font-size, 0);
+        @include doTypeset($mymap);
+}
